@@ -67,26 +67,26 @@ export default function ComprehensiveReport() {
             left: 0;
             top: 0;
             width: 100%;
-            padding: 20px;
-            background: white !important;
-            color: black !important;
-            /* removed grayscale to keep charts colorful */
+            padding: 10px;
+            background: #0D0F16 !important;
+            color: white !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           .print-hide {
             display: none !important;
           }
           /* Force charts to render clearly in print */
           .recharts-wrapper {
-            background: white !important;
+            background: transparent !important;
           }
           .recharts-text {
-            fill: black !important;
+            fill: white !important;
           }
           .cosmic-panel {
-            background: white !important;
-            border: 1px solid #ddd !important;
-            box-shadow: none !important;
-            color: black !important;
+            background: #151828 !important;
+            border: 1px solid rgba(124, 140, 255, 0.2) !important;
+            color: white !important;
             page-break-inside: avoid;
           }
         }

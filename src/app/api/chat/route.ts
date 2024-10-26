@@ -11,10 +11,18 @@ export async function POST(req: NextRequest) {
     // Prepare contextual data based on role
     let contextData = {};
     
-    if (user.role === "FLEET_MANAGER") {
+    if (user.role === "FLEET_MANAGER" || user.role === "ADMIN") {
       const activeTrips = await prisma.trip.count({ where: { status: "DISPATCHED" } });
       const availableVehicles = await prisma.vehicle.count({ where: { status: "AVAILABLE" } });
-      contextData = { activeTrips, availableVehicles, focus: "Dispatch and fleet operations" };
+      const allDrivers = await prisma.driver.findMany({
+        select: { fullName: true, status: true, safetyScore: true, licenseExpiryDate: true }
+      });
+      contextData = { 
+        activeTrips, 
+        availableVehicles, 
+        driversOverview: allDrivers, 
+        focus: "Dispatch, fleet operations, and complete driver analysis" 
+      };
     } else if (user.role === "DRIVER") {
       const myTrips = await prisma.trip.count({ where: { driverId: user.id } });
       contextData = { myTrips, focus: "Personal driver tasks and open trips" };

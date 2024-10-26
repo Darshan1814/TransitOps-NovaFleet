@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         cargoWeightKg: body.cargoWeightKg,
         plannedDistanceKm: body.plannedDistanceKm,
         createdBy: user.id,
-      },
+      } as any,
       include: {
         vehicle: { select: { registrationNumber: true, nameModel: true } },
         driver: { select: { fullName: true } },
