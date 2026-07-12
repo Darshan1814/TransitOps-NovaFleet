@@ -9,7 +9,7 @@ import {
 import { Printer } from "lucide-react";
 
 export default function ComprehensiveReport() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["metrics"],
     queryFn: async () => {
       const res = await fetch("/api/metrics");
@@ -31,8 +31,16 @@ export default function ComprehensiveReport() {
     }
   });
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return <div className="p-8 text-center" style={{ color: "var(--text-tertiary)" }}>Compiling Comprehensive Report...</div>;
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="p-8 text-center" style={{ color: "var(--danger)" }}>
+        Failed to fetch metrics data. Please ensure the backend is running properly.
+      </div>
+    );
   }
 
   const metrics = data.metrics;

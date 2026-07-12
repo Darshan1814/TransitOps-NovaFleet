@@ -15,7 +15,7 @@ export default function SignupPage() {
     fullName: "",
     email: "",
     password: "",
-    role: "FLEET_MANAGER",
+    role: "DRIVER",
     region: "NA",
   });
 
@@ -155,11 +155,8 @@ export default function SignupPage() {
                     onChange={handleChange}
                     className="cosmic-select pl-10"
                   >
-                    <option value="FLEET_MANAGER">Fleet Manager</option>
                     <option value="DRIVER">Driver</option>
                     <option value="SAFETY_OFFICER">Safety Officer</option>
-                    <option value="FINANCIAL_ANALYST">Finance</option>
-                    <option value="ADMIN">Admin</option>
                   </select>
                 </div>
               </div>
