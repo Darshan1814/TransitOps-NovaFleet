@@ -81,11 +81,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div
             className="flex items-center justify-center w-9 h-9 rounded-xl shrink-0"
             style={{
-              background: "linear-gradient(135deg, rgba(124,140,255,0.2), rgba(216,179,107,0.2))",
-              border: "1px solid rgba(124,140,255,0.25)",
+              background: "linear-gradient(135deg, rgba(56,189,248,0.2), rgba(216,179,107,0.2))",
+              border: "1px solid rgba(56,189,248,0.3)",
             }}
           >
-            <Rocket className="w-5 h-5" style={{ color: "var(--accent-glow)" }} />
+            <Rocket className="w-5 h-5" style={{ color: "#38bdf8" }} />
           </div>
           {sidebarOpen && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="overflow-hidden">
@@ -112,11 +112,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <button
                 key={item.href}
                 onClick={() => router.push(item.href)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left relative"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left relative group hover:bg-[rgba(56,189,248,0.05)]"
                 style={{
-                  background: isActive ? "rgba(124,140,255,0.12)" : "transparent",
-                  color: isActive ? "var(--accent-glow)" : "var(--text-secondary)",
-                  border: isActive ? "1px solid rgba(124,140,255,0.2)" : "1px solid transparent",
+                  background: isActive ? "rgba(56,189,248,0.12)" : "transparent",
+                  color: isActive ? "#38bdf8" : "var(--text-secondary)",
+                  border: isActive ? "1px solid rgba(56,189,248,0.25)" : "1px solid transparent",
                 }}
               >
                 {item.icon}
@@ -127,7 +127,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <motion.div
                     layoutId="sidebar-active"
                     className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full"
-                    style={{ background: "var(--accent-glow)" }}
+                    style={{ background: "#38bdf8" }}
                   />
                 )}
               </button>
@@ -142,8 +142,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
                 style={{
-                  background: "linear-gradient(135deg, rgba(124,140,255,0.15), rgba(216,179,107,0.15))",
-                  color: "var(--accent-glow)",
+                  background: "linear-gradient(135deg, rgba(56,189,248,0.15), rgba(216,179,107,0.15))",
+                  color: "#38bdf8",
                 }}
               >
                 {session.user.name?.[0] || "U"}
