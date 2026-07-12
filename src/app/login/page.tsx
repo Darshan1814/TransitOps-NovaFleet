@@ -171,6 +171,7 @@ export default function LoginPage() {
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
+              </div>
               <div className="flex justify-end mt-2">
                 <Link href="/forgot-password" className="text-xs hover:underline transition-colors" style={{ color: "var(--accent-glow)" }}>
                   Forgot Password?
@@ -205,6 +206,7 @@ export default function LoginPage() {
 
             <button
               type="button"
+              onClick={() => signIn("azure-ad")}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-[var(--border-subtle)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--bg-panel-2)] transition-colors"
             >
               <span className="font-semibold text-white">Enterprise</span>
