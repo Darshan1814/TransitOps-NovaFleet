@@ -56,7 +56,7 @@ export default function DriverDashboard() {
   }
 
   // Find the driver profile linked to current user
-  const { data: drivers } = useQuery({
+  const { data: drivers, isLoading: driversLoading } = useQuery({
     queryKey: ["drivers"],
     queryFn: async () => { const res = await fetch("/api/drivers"); return res.json(); },
   });
@@ -183,8 +183,12 @@ export default function DriverDashboard() {
     }
   };
 
+  if (driversLoading) {
+    return <div className="p-8 text-center" style={{ color: "var(--text-tertiary)" }}>Loading dashboard...</div>;
+  }
+
   // If driver doesn't exist or is suspended, they are locked out.
-  if (drivers && (!myDriver || myDriver.status === "SUSPENDED")) {
+  if (!myDriver || myDriver.status === "SUSPENDED") {
     return (
       <div className="space-y-6">
         {error && <div className="p-3 bg-red-500/10 text-red-500 rounded-lg">{error}</div>}
