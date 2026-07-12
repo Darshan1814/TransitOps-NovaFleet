@@ -1,0 +1,237 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  FLEET_MANAGER
+  DRIVER
+  SAFETY_OFFICER
+  FINANCIAL_ANALYST
+  ADMIN
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  ON_TRIP
+  IN_SHOP
+  RETIRED
+}
+
+enum DriverStatus {
+  AVAILABLE
+  ON_TRIP
+  OFF_DUTY
+  SUSPENDED
+}
+
+enum TripStatus {
+  DRAFT
+  DISPATCHED
+  COMPLETED
+  CANCELLED
+}
+
+enum MaintenanceStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id            String         @id @default(uuid())
+  fullName      String
+  email         String         @unique
+  passwordHash  String
+  role          UserRole
+  region        String?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  driver        Driver?
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Vehicle {
+  id                 String          @id @default(uuid())
+  registrationNumber String          @unique
+  nameModel          String
+  vehicleType        String
+  maxLoadCapacityKg  Decimal
+  odometerKm         Decimal         @default(0)
+  acquisitionCost    Decimal
+  region             String?
+  status             VehicleStatus   @default(AVAILABLE)
+  trips              Trip[]
+  maintenanceLogs    MaintenanceLog[]
+  fuelLogs           FuelLog[]
+  expenses           Expense[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@map("vehicles")
+}
+
+model Driver {
+  id                String       @id @default(uuid())
+  userId            String?      @unique
+  user              User?        @relation(fields: [userId], references: [id])
+  fullName          String
+  licenseNumber     String       @unique
+  licenseCategory   String
+  licenseExpiryDate DateTime
+  contactNumber     String
+  safetyScore       Decimal      @default(100)
+  region            String?
+  status            DriverStatus @default(AVAILABLE)
+  trips             Trip[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@map("drivers")
+}
+
+model Trip {
+  id                String     @id @default(uuid())
+  source            String
+  destination       String
+  vehicleId         String
+  vehicle           Vehicle    @relation(fields: [vehicleId], references: [id])
+  driverId          String
+  driver            Driver     @relation(fields: [driverId], references: [id])
+  cargoWeightKg     Decimal
+  plannedDistanceKm Decimal
+  actualDistanceKm  Decimal?
+  fuelConsumedL     Decimal?
+  revenue           Decimal?
+  status            TripStatus @default(DRAFT)
+  dispatchedAt      DateTime?
+  completedAt       DateTime?
+  cancelledAt       DateTime?
+  createdBy         String?
+  fuelLogs          FuelLog[]
+  expenses          Expense[]
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  @@map("trips")
+}
+
+model MaintenanceLog {
+  id          String            @id @default(uuid())
+  vehicleId   String
+  vehicle     Vehicle           @relation(fields: [vehicleId], references: [id])
+  title       String
+  description String?
+  cost        Decimal           @default(0)
+  status      MaintenanceStatus @default(OPEN)
+  openedAt    DateTime          @default(now())
+  closedAt    DateTime?
+  createdBy   String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@map("maintenance_logs")
+}
+
+model FuelLog {
+  id        String   @id @default(uuid())
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  tripId    String?
+  trip      Trip?    @relation(fields: [tripId], references: [id])
+  liters    Decimal
+  cost      Decimal
+  logDate   DateTime @default(now())
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  @@map("fuel_logs")
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  vehicleId   String?
+  vehicle     Vehicle? @relation(fields: [vehicleId], references: [id])
+  tripId      String?
+  trip        Trip?    @relation(fields: [tripId], references: [id])
+  category    String
+  amount      Decimal
+  expenseDate DateTime @default(now())
+  notes       String?
+  createdBy   String?
+  createdAt   DateTime @default(now())
+
+  @@map("expenses")
+}
+
+model ProofDocument {
+  id           String         @id @default(uuid())
+  submittedBy  String
+  entityType   String
+  entityId     String
+  proofType    String
+  fileUrl      String
+  status       ApprovalStatus @default(PENDING)
+  reviewedBy   String?
+  reviewNote   String?
+  submittedAt  DateTime       @default(now())
+  reviewedAt   DateTime?
+
+  @@map("proof_documents")
+}
+
+model DashboardRequest {
+  id             String         @id @default(uuid())
+  requestType    String
+  originRole     UserRole
+  targetRole     UserRole
+  referenceTable String
+  referenceId    String
+  message        String?
+  status         ApprovalStatus @default(PENDING)
+  createdBy      String?
+  resolvedBy     String?
+  createdAt      DateTime       @default(now())
+  resolvedAt     DateTime?
+
+  @@map("dashboard_requests")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  body      String?
+  isRead    Boolean  @default(false)
+  severity  String   @default("INFO")
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorId     String?
+  action      String
+  tableName   String
+  recordId    String
+  beforeState Json?
+  afterState  Json?
+  createdAt   DateTime @default(now())
+
+  @@map("audit_logs")
+}
