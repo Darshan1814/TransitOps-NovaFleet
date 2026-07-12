@@ -1,0 +1,491 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@theme {
+  --color-bg-void: #05060A;
+  --color-bg-panel: #0D0F16;
+  --color-bg-panel-2: #14161F;
+  --color-border-subtle: #232633;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-text-primary: #F5F6FA;
+  --color-text-secondary: #A6ACC2;
+  --color-text-tertiary: #6B7089;
+  --color-accent-nova: #E6E9F5;
+  --color-accent-glow: #7C8CFF;
+  --color-accent-gold: #D8B36B;
+  --color-success: #4ADE80;
+  --color-warning: #FBBF24;
+  --color-danger: #F87171;
+  --color-chart-grid: rgba(255, 255, 255, 0.06);
+
+  /* Light mode overrides */
+  --color-light-bg-void: #FAFAFC;
+  --color-light-bg-panel: #FFFFFF;
+  --color-light-bg-panel-2: #F4F5F7;
+  --color-light-border-subtle: #E2E4E9;
+  --color-light-border: rgba(0, 0, 0, 0.08);
+  --color-light-text-primary: #0B0C10;
+  --color-light-text-secondary: #4A4F65;
+  --color-light-text-tertiary: #8A8FA5;
+
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
+/* ====================================
+   ROOT CSS CUSTOM PROPERTIES (THEMING)
+   ==================================== */
+:root {
+  --bg-void: #FAFAFC;
+  --bg-panel: #FFFFFF;
+  --bg-panel-2: #F4F5F7;
+  --border-subtle: #E2E4E9;
+  --border: rgba(0, 0, 0, 0.08);
+  --text-primary: #0B0C10;
+  --text-secondary: #4A4F65;
+  --text-tertiary: #8A8FA5;
+  --accent-nova: #3B3F54;
+  --accent-glow: #5B6BDF;
+  --accent-gold: #B8932B;
+  --success: #22C55E;
+  --warning: #EAB308;
+  --danger: #EF4444;
+  --chart-grid: rgba(0, 0, 0, 0.06);
+  --panel-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --panel-glow: none;
+}
+
+.dark {
+  --bg-void: #05060A;
+  --bg-panel: #0D0F16;
+  --bg-panel-2: #14161F;
+  --border-subtle: #232633;
+  --border: rgba(255, 255, 255, 0.08);
+  --text-primary: #F5F6FA;
+  --text-secondary: #A6ACC2;
+  --text-tertiary: #6B7089;
+  --accent-nova: #E6E9F5;
+  --accent-glow: #7C8CFF;
+  --accent-gold: #D8B36B;
+  --success: #4ADE80;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --chart-grid: rgba(255, 255, 255, 0.06);
+  --panel-shadow: 0 0 0 1px var(--border), 0 8px 24px rgba(0, 0, 0, 0.4);
+  --panel-glow: 0 0 40px rgba(124, 140, 255, 0.03);
+}
+
+/* ====================================
+   BASE STYLES
+   ==================================== */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  background: var(--bg-void);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ====================================
+   TYPOGRAPHY
+   ==================================== */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ====================================
+   COSMIC PANEL / CARD
+   ==================================== */
+.cosmic-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--panel-shadow);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.cosmic-panel:hover {
+  box-shadow: var(--panel-shadow), var(--panel-glow);
+}
+
+.cosmic-panel-2 {
+  background: var(--bg-panel-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* ====================================
+   STATUS PILLS
+   ==================================== */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.status-available {
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+}
+
+.status-on-trip {
+  background: rgba(124, 140, 255, 0.12);
+  color: var(--accent-glow);
+  border: 1px solid rgba(124, 140, 255, 0.25);
+}
+
+.status-in-shop, .status-suspended {
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--warning);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
+.status-retired, .status-cancelled {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--danger);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
+.status-pending {
+  background: rgba(216, 179, 107, 0.12);
+  color: var(--accent-gold);
+  border: 1px solid rgba(216, 179, 107, 0.25);
+}
+
+.status-approved {
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+}
+
+.status-rejected {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--danger);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
+.status-draft {
+  background: rgba(107, 112, 137, 0.12);
+  color: var(--text-tertiary);
+  border: 1px solid rgba(107, 112, 137, 0.25);
+}
+
+.status-dispatched {
+  background: rgba(124, 140, 255, 0.12);
+  color: var(--accent-glow);
+  border: 1px solid rgba(124, 140, 255, 0.25);
+}
+
+.status-completed {
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+}
+
+/* ====================================
+   SCROLLBAR STYLING
+   ==================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* ====================================
+   STARFIELD NOISE TEXTURE (LOGIN ONLY)
+   ==================================== */
+.starfield-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.starfield-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.3), transparent),
+                     radial-gradient(1px 1px at 40% 70%, rgba(255, 255, 255, 0.2), transparent),
+                     radial-gradient(1px 1px at 60% 20%, rgba(255, 255, 255, 0.25), transparent),
+                     radial-gradient(1px 1px at 80% 50%, rgba(255, 255, 255, 0.15), transparent),
+                     radial-gradient(1.5px 1.5px at 10% 80%, rgba(255, 255, 255, 0.35), transparent),
+                     radial-gradient(1px 1px at 70% 90%, rgba(255, 255, 255, 0.2), transparent),
+                     radial-gradient(1px 1px at 30% 50%, rgba(255, 255, 255, 0.18), transparent),
+                     radial-gradient(1.5px 1.5px at 90% 10%, rgba(255, 255, 255, 0.3), transparent),
+                     radial-gradient(1px 1px at 50% 40%, rgba(255, 255, 255, 0.22), transparent),
+                     radial-gradient(1px 1px at 15% 15%, rgba(255, 255, 255, 0.28), transparent);
+  background-size: 200px 200px;
+  opacity: 0.04;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cosmic-halo {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 140, 255, 0.08) 0%, rgba(216, 179, 107, 0.04) 40%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: halo-drift 20s ease-in-out infinite;
+}
+
+@keyframes halo-drift {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* ====================================
+   BUTTON VARIANTS
+   ==================================== */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--accent-glow);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.btn-primary:hover {
+  background: #6B7BEF;
+  box-shadow: 0 0 20px rgba(124, 140, 255, 0.3);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-panel-2);
+  border-color: var(--text-tertiary);
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--danger);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.btn-danger:hover {
+  background: rgba(248, 113, 113, 0.2);
+}
+
+.btn-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+}
+
+.btn-success:hover {
+  background: rgba(74, 222, 128, 0.2);
+}
+
+/* ====================================
+   FORM INPUTS
+   ==================================== */
+.cosmic-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-panel-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cosmic-input:focus {
+  border-color: var(--accent-glow);
+  box-shadow: 0 0 0 3px rgba(124, 140, 255, 0.15);
+}
+
+.cosmic-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.cosmic-select {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-panel-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 0.2s ease;
+  cursor: pointer;
+  appearance: none;
+}
+
+.cosmic-select:focus {
+  border-color: var(--accent-glow);
+  box-shadow: 0 0 0 3px rgba(124, 140, 255, 0.15);
+}
+
+.cosmic-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+
+/* ====================================
+   DATA TABLE
+   ==================================== */
+.cosmic-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.cosmic-table thead th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border);
+}
+
+.cosmic-table tbody td {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.15s ease;
+}
+
+.cosmic-table tbody tr:hover td {
+  background: var(--bg-panel-2);
+}
+
+.cosmic-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ====================================
+   SKELETON LOADER
+   ==================================== */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-panel-2) 25%, var(--border-subtle) 50%, var(--bg-panel-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ====================================
+   UTILITY CLASSES
+   ==================================== */
+.text-gradient {
+  background: linear-gradient(135deg, var(--accent-nova), var(--accent-glow));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-border {
+  border: 1px solid transparent;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-image: linear-gradient(var(--bg-panel), var(--bg-panel)),
+                     linear-gradient(135deg, rgba(124, 140, 255, 0.3), rgba(216, 179, 107, 0.3));
+}
