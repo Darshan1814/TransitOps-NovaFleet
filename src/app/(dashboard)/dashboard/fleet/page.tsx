@@ -243,6 +243,7 @@ export default function FleetDashboard() {
                     color: "var(--text-primary)",
                     fontSize: "12px",
                   }}
+                  itemStyle={{ color: "var(--text-primary)" }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -275,6 +276,7 @@ export default function FleetDashboard() {
                 <YAxis type="category" dataKey="registrationNumber" tick={{ fontSize: 11, fill: "var(--text-secondary)" }} width={80} />
                 <Tooltip
                   contentStyle={{ background: "var(--bg-panel)", border: "1px solid var(--border-subtle)", borderRadius: "8px", fontSize: "12px", color: "var(--text-primary)" }}
+                  itemStyle={{ color: "var(--text-primary)" }}
                   formatter={(v: number) => [`${v.toFixed(2)}%`, "ROI"]}
                 />
                 <Bar dataKey="roi" fill="#4ADE80" radius={[0, 4, 4, 0]} />
