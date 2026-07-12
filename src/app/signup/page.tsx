@@ -174,6 +174,9 @@ export default function SignupPage() {
                   >
                     <option value="DRIVER">Driver</option>
                     <option value="SAFETY_OFFICER">Safety Officer</option>
+                    <option value="FLEET_MANAGER">Fleet Manager</option>
+                    <option value="FINANCIAL_ANALYST">Financial Analyst</option>
+                    <option value="ADMIN">Admin</option>
                   </select>
                 </div>
               </div>

@@ -4,7 +4,7 @@ import { requireRole } from "@/lib/requireRole";
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await requireRole("DRIVER");
+    const user = await requireRole("DRIVER");
     const body = await req.json();
 
     const {
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     const result = await prisma.$transaction(async (tx) => {
       const driver = await tx.driver.create({
         data: {
-          userId: session.user.id,
+          userId: user.id,
           fullName,
           licenseNumber,
           licenseCategory,
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
       const proof = await tx.proofDocument.create({
         data: {
-          submittedBy: session.user.id,
+          submittedBy: user.id,
           entityType: "DRIVER",
           entityId: driver.id,
           proofType: "LICENSE_DOCUMENT",
