@@ -36,12 +36,14 @@ const navItems: Record<string, { label: string; icon: React.ReactNode; href: str
   ],
   FINANCIAL_ANALYST: [
     { label: "Ledger Deck", icon: <BarChart3 className="w-5 h-5" />, href: "/dashboard/finance", themeName: "Ledger Deck" },
+    { label: "Master Reports", icon: <Rocket className="w-5 h-5" />, href: "/dashboard/reports", themeName: "Master Reports" },
   ],
   ADMIN: [
     { label: "The Tower", icon: <Crown className="w-5 h-5" />, href: "/dashboard/admin", themeName: "The Tower" },
     { label: "Mission Control", icon: <Satellite className="w-5 h-5" />, href: "/dashboard/fleet", themeName: "Fleet View" },
     { label: "Watchtower", icon: <Shield className="w-5 h-5" />, href: "/dashboard/safety", themeName: "Safety View" },
     { label: "Ledger Deck", icon: <BarChart3 className="w-5 h-5" />, href: "/dashboard/finance", themeName: "Finance View" },
+    { label: "Master Reports", icon: <Rocket className="w-5 h-5" />, href: "/dashboard/reports", themeName: "Master Reports" },
   ],
 };
 

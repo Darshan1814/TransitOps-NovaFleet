@@ -17,6 +17,12 @@ export default function DriverDashboard() {
   const [tripForm, setTripForm] = useState({ source: "", destination: "", vehicleId: "", driverId: "", cargoWeightKg: "", plannedDistanceKm: "" });
   const [completeForm, setCompleteForm] = useState({ actualDistanceKm: "", fuelConsumedL: "", revenue: "" });
   const [error, setError] = useState("");
+  
+  // Verification State
+  const [verifyForm, setVerifyForm] = useState({
+    fullName: "", licenseNumber: "", licenseCategory: "Class A", licenseExpiryDate: "", contactNumber: "", region: "NA", documentBase64: ""
+  });
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // Find the driver profile linked to current user
   const { data: drivers } = useQuery({
@@ -118,6 +124,85 @@ export default function DriverDashboard() {
     },
     onError: (e) => setError(e.message),
   });
+
+  const submitVerificationMut = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/drivers/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(verifyForm)
+      });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["drivers"] });
+    },
+    onError: (e) => setError(e.message),
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setVerifyForm({ ...verifyForm, documentBase64: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // If driver doesn't exist or is suspended, they are locked out.
+  if (drivers && (!myDriver || myDriver.status === "SUSPENDED")) {
+    return (
+      <div className="space-y-6">
+        {error && <div className="p-3 bg-red-500/10 text-red-500 rounded-lg">{error}</div>}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="cosmic-panel p-8 max-w-2xl mx-auto text-center">
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center">
+              <XCircle className="w-8 h-8 text-red-500" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold mb-2">Account Verification Required</h2>
+          
+          {myDriver ? (
+            <p className="text-[var(--text-secondary)] mb-6">Your driver profile is currently under review by the Safety Officer. You will regain access once approved.</p>
+          ) : (
+            <>
+              <p className="text-[var(--text-secondary)] mb-6">Please complete your driver profile and upload your license to access the dashboard.</p>
+              <form onSubmit={(e) => { e.preventDefault(); submitVerificationMut.mutate(); }} className="space-y-4 text-left">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="cosmic-label">Full Name</label>
+                    <input required className="cosmic-input" value={verifyForm.fullName} onChange={e => setVerifyForm({...verifyForm, fullName: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="cosmic-label">License Number</label>
+                    <input required className="cosmic-input" value={verifyForm.licenseNumber} onChange={e => setVerifyForm({...verifyForm, licenseNumber: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="cosmic-label">License Expiry</label>
+                    <input required type="date" className="cosmic-input" value={verifyForm.licenseExpiryDate} onChange={e => setVerifyForm({...verifyForm, licenseExpiryDate: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="cosmic-label">Contact Number</label>
+                    <input required className="cosmic-input" value={verifyForm.contactNumber} onChange={e => setVerifyForm({...verifyForm, contactNumber: e.target.value})} />
+                  </div>
+                </div>
+                <div>
+                  <label className="cosmic-label">Upload License (Image)</label>
+                  <input required type="file" accept="image/*" onChange={handleFileChange} className="cosmic-input" />
+                </div>
+                <button type="submit" disabled={submitVerificationMut.isPending || !verifyForm.documentBase64} className="btn-primary w-full mt-4">
+                  {submitVerificationMut.isPending ? "Submitting..." : "Submit for Verification"}
+                </button>
+              </form>
+            </>
+          )}
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

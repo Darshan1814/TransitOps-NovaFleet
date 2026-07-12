@@ -1,14 +1,44 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { KPICard } from "@/components/dashboard/KPICard";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { formatDateTime, daysUntil } from "@/lib/utils";
-import { Shield, ShieldAlert, AlertTriangle, UserX, CheckCircle, XCircle } from "lucide-react";
+import { Shield, ShieldAlert, AlertTriangle, UserX, CheckCircle, XCircle, Plus, X } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function SafetyDashboard() {
   const queryClient = useQueryClient();
+  const [isAddDriverOpen, setIsAddDriverOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [driverForm, setDriverForm] = useState({
+    fullName: "", licenseNumber: "", licenseCategory: "Class A", licenseExpiryDate: "", contactNumber: "", region: "NA"
+  });
+
+  const addDriverMutation = useMutation({
+    mutationFn: async (newDriver: any) => {
+      const res = await fetch("/api/drivers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newDriver),
+      });
+      if (!res.ok) throw new Error("Failed to add driver");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["drivers"] });
+      setIsAddDriverOpen(false);
+      setDriverForm({ fullName: "", licenseNumber: "", licenseCategory: "Class A", licenseExpiryDate: "", contactNumber: "", region: "NA" });
+    },
+  });
+
+  const handleAddDriver = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    await addDriverMutation.mutateAsync(driverForm);
+    setIsSubmitting(false);
+  };
 
   const { data: drivers, isLoading } = useQuery({
     queryKey: ["drivers"],
@@ -16,6 +46,27 @@ export default function SafetyDashboard() {
       const res = await fetch("/api/drivers");
       if (!res.ok) throw new Error("Failed to fetch drivers");
       return res.json();
+    },
+  });
+
+  const { data: proofs } = useQuery({
+    queryKey: ["proofs"],
+    queryFn: async () => {
+      const res = await fetch("/api/proofs");
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
+  const approveProofMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/proofs/${id}/approve`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed to approve");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["proofs"] });
+      queryClient.invalidateQueries({ queryKey: ["drivers"] });
     },
   });
 
@@ -52,9 +103,70 @@ export default function SafetyDashboard() {
   const expiringDrivers = drivers?.filter((d: { licenseExpiryDate: string }) => daysUntil(d.licenseExpiryDate) <= 30 && daysUntil(d.licenseExpiryDate) >= 0) || [];
   const expiredDrivers = drivers?.filter((d: { licenseExpiryDate: string }) => daysUntil(d.licenseExpiryDate) < 0) || [];
   const suspendedDrivers = drivers?.filter((d: { status: string }) => d.status === "SUSPENDED") || [];
+  const pendingProofs = proofs?.filter((p: any) => p.status === "PENDING" && p.entityType === "DRIVER") || [];
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">Safety Overview</h2>
+        <button onClick={() => setIsAddDriverOpen(true)} className="btn-primary">
+          <Plus className="w-4 h-4" /> Register Driver
+        </button>
+      </div>
+
+      {isAddDriverOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="cosmic-panel p-6 w-full max-w-lg bg-[#0D0F16]">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold">Register New Driver</h3>
+              <button onClick={() => setIsAddDriverOpen(false)} className="text-[var(--text-tertiary)] hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+            <form onSubmit={handleAddDriver} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="cosmic-label">Full Name</label>
+                  <input type="text" required className="cosmic-input" value={driverForm.fullName} onChange={e => setDriverForm({...driverForm, fullName: e.target.value})} placeholder="Alex Smith" />
+                </div>
+                <div>
+                  <label className="cosmic-label">License Number</label>
+                  <input type="text" required className="cosmic-input" value={driverForm.licenseNumber} onChange={e => setDriverForm({...driverForm, licenseNumber: e.target.value})} placeholder="DL-12345" />
+                </div>
+                <div>
+                  <label className="cosmic-label">License Category</label>
+                  <select className="cosmic-select" value={driverForm.licenseCategory} onChange={e => setDriverForm({...driverForm, licenseCategory: e.target.value})}>
+                    <option value="Class A">Class A (Commercial)</option>
+                    <option value="Class B">Class B (Heavy)</option>
+                    <option value="Class C">Class C (Standard)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="cosmic-label">Expiry Date</label>
+                  <input type="date" required className="cosmic-input" value={driverForm.licenseExpiryDate} onChange={e => setDriverForm({...driverForm, licenseExpiryDate: e.target.value})} />
+                </div>
+                <div>
+                  <label className="cosmic-label">Contact Number</label>
+                  <input type="text" required className="cosmic-input" value={driverForm.contactNumber} onChange={e => setDriverForm({...driverForm, contactNumber: e.target.value})} placeholder="+1 555-0123" />
+                </div>
+                <div>
+                  <label className="cosmic-label">Region</label>
+                  <select className="cosmic-select" value={driverForm.region} onChange={e => setDriverForm({...driverForm, region: e.target.value})}>
+                    <option value="NA">North America</option>
+                    <option value="EU">Europe</option>
+                    <option value="APAC">APAC</option>
+                  </select>
+                </div>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsAddDriverOpen(false)} className="btn-secondary">Cancel</button>
+                <button type="submit" disabled={isSubmitting} className="btn-primary">
+                  {isSubmitting ? "Registering..." : "Register Driver"}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard title="Total Drivers" value={drivers?.length || 0} icon={Shield} color="glow" />
@@ -62,6 +174,42 @@ export default function SafetyDashboard() {
         <KPICard title="Expired Licenses" value={expiredDrivers.length} icon={ShieldAlert} color="danger" delay={0.1} />
         <KPICard title="Suspended" value={suspendedDrivers.length} icon={UserX} color="danger" delay={0.15} />
       </div>
+
+      {/* Pending Verifications */}
+      {pendingProofs.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }} className="cosmic-panel p-5 border border-[var(--accent-glow)]">
+          <h3 className="text-sm font-semibold mb-4" style={{ color: "var(--text-primary)", fontFamily: "var(--font-heading)" }}>
+            Pending Driver Verifications
+          </h3>
+          <div className="space-y-3">
+            {pendingProofs.map((proof: any) => {
+              const driver = drivers?.find((d: any) => d.id === proof.entityId);
+              return (
+                <div key={proof.id} className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-panel-2)]">
+                  <div className="flex gap-4 items-center">
+                    {proof.fileUrl && proof.fileUrl.startsWith('data:image') && (
+                      <img src={proof.fileUrl} alt="Document" className="w-16 h-16 object-cover rounded border border-[var(--border-subtle)]" />
+                    )}
+                    <div>
+                      <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{driver?.fullName || 'Unknown Driver'}</p>
+                      <p className="text-xs" style={{ color: "var(--text-secondary)" }}>License: {driver?.licenseNumber}</p>
+                      <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>Submitted: {formatDateTime(proof.submittedAt)}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => approveProofMutation.mutate(proof.id)} 
+                    disabled={approveProofMutation.isPending}
+                    className="btn-success text-xs"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                    Approve
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
 
       {/* Driver List & Safety Scores */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="cosmic-panel p-5">

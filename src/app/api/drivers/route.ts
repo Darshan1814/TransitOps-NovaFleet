@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await requireRole("FLEET_MANAGER", "SAFETY_OFFICER", "ADMIN");
+    await requireRole("FLEET_MANAGER", "SAFETY_OFFICER", "ADMIN", "DRIVER");
     const body = await req.json();
 
     const driver = await prisma.driver.create({
