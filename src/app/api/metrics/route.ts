@@ -18,13 +18,13 @@ export async function GET() {
     // 1. Expiring Drivers
     const expiringDrivers = await prisma.driver.findMany({
       where: {
-        licenseExpiryDate: { lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
+        licenseExpiryDate: { gte: new Date(), lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
         status: { not: "SUSPENDED" },
       },
       select: { fullName: true, licenseExpiryDate: true, licenseNumber: true },
     });
 
-    // 2. Fuel Efficiency Trend (Last 7 Days)
+    // 2. Fuel Efficiency Trend (Last 30 Days)
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const recentTrips = await prisma.trip.findMany({
       where: { status: "COMPLETED", completedAt: { gte: thirtyDaysAgo }, actualDistanceKm: { not: null }, fuelConsumedL: { not: null } },
@@ -48,13 +48,18 @@ export async function GET() {
     }));
 
     // 3. Maintenance Summary
-    const maintenanceLogs = await prisma.maintenanceLog.findMany({
-      select: { status: true, cost: true }
+    const statusCounts = await prisma.maintenanceLog.groupBy({
+      by: ["status"],
+      _count: { _all: true }
     });
+    const avgCostAgg = await prisma.maintenanceLog.aggregate({
+      _avg: { cost: true }
+    });
+    
     const maintenanceSummary = {
-      open: maintenanceLogs.filter(l => l.status === "OPEN").length,
-      closed: maintenanceLogs.filter(l => l.status === "CLOSED").length,
-      avgCost: maintenanceLogs.length > 0 ? maintenanceLogs.reduce((s, l) => s + Number(l.cost || 0), 0) / maintenanceLogs.length : 0
+      open: statusCounts.find(s => s.status === "OPEN")?._count._all || 0,
+      closed: statusCounts.find(s => s.status === "CLOSED")?._count._all || 0,
+      avgCost: Number(avgCostAgg._avg.cost || 0)
     };
 
     // 4. Admin Compliance

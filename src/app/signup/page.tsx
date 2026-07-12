@@ -173,7 +173,10 @@ export default function SignupPage() {
                     className="cosmic-select pl-10"
                   >
                     <option value="DRIVER">Driver</option>
+                    <option value="FLEET_MANAGER">Fleet Manager</option>
                     <option value="SAFETY_OFFICER">Safety Officer</option>
+                    <option value="FINANCIAL_ANALYST">Financial Analyst</option>
+                    <option value="ADMIN">Administrator</option>
                   </select>
                 </div>
               </div>

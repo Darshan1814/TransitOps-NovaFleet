@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const passwordHash = await bcrypt.hash(password, salt);
 
     // Enforce safe roles (prevent privilege escalation)
-    const safeRoles = ["DRIVER", "SAFETY_OFFICER"];
+    const safeRoles = ["DRIVER", "FLEET_MANAGER", "SAFETY_OFFICER", "FINANCIAL_ANALYST", "ADMIN"];
     const finalRole = safeRoles.includes(role) ? role : "DRIVER";
 
     // 4. Create user in DB

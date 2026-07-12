@@ -9,7 +9,7 @@ import { BarChart, Bar, Cell, XAxis, Tooltip, ResponsiveContainer } from "rechar
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<{ role: "user" | "bot"; content: string; special?: "pdf" | "graph" }[]>([]);
+  const [messages, setMessages] = useState<{ id: string; role: "user" | "bot"; content: string; special?: "pdf" | "graph" }[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
@@ -21,7 +21,7 @@ export function Chatbot() {
       if (!res.ok) return [];
       return res.json();
     },
-    enabled: isOpen, // only fetch if chat is open
+    enabled: isOpen && pathname !== "/dashboard/finance", // only fetch if chat is open and not on finance
   });
 
   // Hide chatbot on Ledger Deck (Finance)
@@ -34,7 +34,7 @@ export function Chatbot() {
     if (!input.trim()) return;
 
     const userMessage = input;
-    setMessages(prev => [...prev, { role: "user", content: userMessage }]);
+    setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "user", content: userMessage }]);
     setInput("");
     setIsLoading(true);
 
@@ -59,9 +59,10 @@ export function Chatbot() {
         reply = reply.replace("[SHOW_GRAPH]", "").trim();
       }
 
-      setMessages(prev => [...prev, { role: "bot", content: reply, special }]);
+      setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "bot", content: reply, special }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: "bot", content: "Sorry, I encountered a cosmic anomaly and couldn't process that request." }]);
+      console.error(error);
+      setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "bot", content: "Sorry, I encountered a cosmic anomaly and couldn't process that request." }]);
     } finally {
       setIsLoading(false);
     }
@@ -101,8 +102,8 @@ export function Chatbot() {
                   Hello! I am Nova, your fleet assistant. Ask me anything about your current dashboard.
                 </div>
               )}
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
+              {messages.map((msg) => (
+                <div key={msg.id} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
                   <div className={`p-3 rounded-2xl max-w-[85%] text-sm ${
                     msg.role === "user" 
                       ? "bg-[var(--accent-glow)] text-white rounded-tr-none" 

@@ -171,36 +171,36 @@ export default function FleetDashboard() {
             <form onSubmit={handleAddVehicle} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="cosmic-label">Registration Number</label>
-                  <input type="text" required className="cosmic-input" value={vehicleForm.registrationNumber} onChange={e => setVehicleForm({...vehicleForm, registrationNumber: e.target.value})} placeholder="VAN-01" />
+                  <label htmlFor="regNumber" className="cosmic-label">Registration Number</label>
+                  <input id="regNumber" type="text" required className="cosmic-input" value={vehicleForm.registrationNumber} onChange={e => setVehicleForm({...vehicleForm, registrationNumber: e.target.value})} placeholder="VAN-01" />
                 </div>
                 <div>
-                  <label className="cosmic-label">Model Name</label>
-                  <input type="text" required className="cosmic-input" value={vehicleForm.nameModel} onChange={e => setVehicleForm({...vehicleForm, nameModel: e.target.value})} placeholder="Ford Transit" />
+                  <label htmlFor="modelName" className="cosmic-label">Model Name</label>
+                  <input id="modelName" type="text" required className="cosmic-input" value={vehicleForm.nameModel} onChange={e => setVehicleForm({...vehicleForm, nameModel: e.target.value})} placeholder="Ford Transit" />
                 </div>
                 <div>
-                  <label className="cosmic-label">Type</label>
-                  <select className="cosmic-select" value={vehicleForm.vehicleType} onChange={e => setVehicleForm({...vehicleForm, vehicleType: e.target.value})}>
+                  <label htmlFor="vehicleType" className="cosmic-label">Type</label>
+                  <select id="vehicleType" className="cosmic-select" value={vehicleForm.vehicleType} onChange={e => setVehicleForm({...vehicleForm, vehicleType: e.target.value})}>
                     <option value="Van">Van</option>
                     <option value="Truck">Truck</option>
                     <option value="Semi">Semi-Trailer</option>
                   </select>
                 </div>
                 <div>
-                  <label className="cosmic-label">Region</label>
-                  <select className="cosmic-select" value={vehicleForm.region} onChange={e => setVehicleForm({...vehicleForm, region: e.target.value})}>
+                  <label htmlFor="region" className="cosmic-label">Region</label>
+                  <select id="region" className="cosmic-select" value={vehicleForm.region} onChange={e => setVehicleForm({...vehicleForm, region: e.target.value})}>
                     <option value="NA">North America</option>
                     <option value="EU">Europe</option>
                     <option value="APAC">APAC</option>
                   </select>
                 </div>
                 <div>
-                  <label className="cosmic-label">Max Load (kg)</label>
-                  <input type="number" required min="1" className="cosmic-input" value={vehicleForm.maxLoadCapacityKg} onChange={e => setVehicleForm({...vehicleForm, maxLoadCapacityKg: e.target.value})} />
+                  <label htmlFor="maxLoad" className="cosmic-label">Max Load (kg)</label>
+                  <input id="maxLoad" type="number" required min="1" className="cosmic-input" value={vehicleForm.maxLoadCapacityKg} onChange={e => setVehicleForm({...vehicleForm, maxLoadCapacityKg: e.target.value})} />
                 </div>
                 <div>
-                  <label className="cosmic-label">Acquisition Cost ($)</label>
-                  <input type="number" required min="1" className="cosmic-input" value={vehicleForm.acquisitionCost} onChange={e => setVehicleForm({...vehicleForm, acquisitionCost: e.target.value})} />
+                  <label htmlFor="acqCost" className="cosmic-label">Acquisition Cost ($)</label>
+                  <input id="acqCost" type="number" required min="1" className="cosmic-input" value={vehicleForm.acquisitionCost} onChange={e => setVehicleForm({...vehicleForm, acquisitionCost: e.target.value})} />
                 </div>
               </div>
               <div className="pt-4 flex justify-end gap-3">
@@ -225,8 +225,8 @@ export default function FleetDashboard() {
             <form onSubmit={handleCreateTrip} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="cosmic-label">Select Available Vehicle</label>
-                  <select required className="cosmic-select" value={tripForm.vehicleId} onChange={e => setTripForm({...tripForm, vehicleId: e.target.value})}>
+                  <label htmlFor="tripVehicle" className="cosmic-label">Select Available Vehicle</label>
+                  <select id="tripVehicle" required className="cosmic-select" value={tripForm.vehicleId} onChange={e => setTripForm({...tripForm, vehicleId: e.target.value})}>
                     <option value="">Select a vehicle...</option>
                     {availableVehicles?.map((v: any) => (
                       <option key={v.id} value={v.id}>{v.registrationNumber} - {v.nameModel} ({v.maxLoadCapacityKg}kg cap)</option>
@@ -234,20 +234,20 @@ export default function FleetDashboard() {
                   </select>
                 </div>
                 <div>
-                  <label className="cosmic-label">Source</label>
-                  <input type="text" required className="cosmic-input" value={tripForm.source} onChange={e => setTripForm({...tripForm, source: e.target.value})} placeholder="Warehouse A" />
+                  <label htmlFor="tripSource" className="cosmic-label">Source</label>
+                  <input id="tripSource" type="text" required className="cosmic-input" value={tripForm.source} onChange={e => setTripForm({...tripForm, source: e.target.value})} placeholder="Warehouse A" />
                 </div>
                 <div>
-                  <label className="cosmic-label">Destination</label>
-                  <input type="text" required className="cosmic-input" value={tripForm.destination} onChange={e => setTripForm({...tripForm, destination: e.target.value})} placeholder="Store 15" />
+                  <label htmlFor="tripDest" className="cosmic-label">Destination</label>
+                  <input id="tripDest" type="text" required className="cosmic-input" value={tripForm.destination} onChange={e => setTripForm({...tripForm, destination: e.target.value})} placeholder="Store 15" />
                 </div>
                 <div>
-                  <label className="cosmic-label">Cargo Weight (kg)</label>
-                  <input type="number" required min="1" className="cosmic-input" value={tripForm.cargoWeightKg} onChange={e => setTripForm({...tripForm, cargoWeightKg: e.target.value})} />
+                  <label htmlFor="tripWeight" className="cosmic-label">Cargo Weight (kg)</label>
+                  <input id="tripWeight" type="number" required min="1" className="cosmic-input" value={tripForm.cargoWeightKg} onChange={e => setTripForm({...tripForm, cargoWeightKg: e.target.value})} />
                 </div>
                 <div>
-                  <label className="cosmic-label">Est. Distance (km)</label>
-                  <input type="number" required min="1" className="cosmic-input" value={tripForm.plannedDistanceKm} onChange={e => setTripForm({...tripForm, plannedDistanceKm: e.target.value})} />
+                  <label htmlFor="tripDist" className="cosmic-label">Est. Distance (km)</label>
+                  <input id="tripDist" type="number" required min="1" className="cosmic-input" value={tripForm.plannedDistanceKm} onChange={e => setTripForm({...tripForm, plannedDistanceKm: e.target.value})} />
                 </div>
               </div>
               <div className="pt-4 flex justify-end gap-3">

@@ -3,7 +3,8 @@ pipeline {
 
     environment {
         AWS_REGION = 'us-east-1'
-        ECR_REGISTRY = 'your-account-id.dkr.ecr.us-east-1.amazonaws.com'
+        AWS_ACCOUNT_ID = credentials('aws-account-id')
+        ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         ECR_REPOSITORY = 'novafleet-app'
         IMAGE_TAG = "${env.BUILD_ID}"
         KUBECONFIG = credentials('kubeconfig-credentials')

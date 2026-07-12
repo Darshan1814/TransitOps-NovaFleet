@@ -9,12 +9,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     // Find the driver profile for the current user
     const driver = await prisma.driver.findUnique({ where: { userId: user.id } });
-    if (!driver || driver.status !== "AVAILABLE") {
+    if (driver?.status !== "AVAILABLE") {
       return NextResponse.json({ error: "Driver not available or suspended" }, { status: 409 });
     }
 
     const trip = await prisma.trip.findUnique({ where: { id } });
-    if (!trip || trip.driverId !== null) {
+    if (!trip || trip?.driverId !== null) {
       return NextResponse.json({ error: "Trip is no longer available" }, { status: 409 });
     }
 
