@@ -6,8 +6,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { KPICard } from "@/components/dashboard/KPICard";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { formatNumber, formatDateTime } from "@/lib/utils";
-import { Navigation, MapPin, Truck, Package, Fuel, CheckCircle, XCircle, Rocket } from "lucide-react";
+import { Navigation, MapPin, Truck, Package, Fuel, CheckCircle, XCircle, Rocket, Map } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLoadScript, GoogleMap, DirectionsRenderer, Autocomplete } from "@react-google-maps/api";
+
+const libraries: ("places")[] = ["places"];
 
 export default function DriverDashboard() {
   const { data: session } = useSession();
@@ -23,6 +26,34 @@ export default function DriverDashboard() {
     fullName: "", licenseNumber: "", licenseCategory: "Class A", licenseExpiryDate: "", contactNumber: "", region: "NA", documentBase64: ""
   });
   const [isVerifying, setIsVerifying] = useState(false);
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+    libraries,
+  });
+
+  const [directionsResponse, setDirectionsResponse] = useState<any>(null);
+  const [sourceAutocomplete, setSourceAutocomplete] = useState<any>(null);
+  const [destAutocomplete, setDestAutocomplete] = useState<any>(null);
+
+  async function calculateRoute() {
+    if (!tripForm.source || !tripForm.destination || !window.google) return;
+    try {
+      const directionsService = new window.google.maps.DirectionsService();
+      const results = await directionsService.route({
+        origin: tripForm.source,
+        destination: tripForm.destination,
+        travelMode: window.google.maps.TravelMode.DRIVING,
+      });
+      setDirectionsResponse(results);
+      if (results.routes[0]?.legs[0]?.distance?.value) {
+        const km = (results.routes[0].legs[0].distance.value / 1000).toFixed(1);
+        setTripForm(prev => ({ ...prev, plannedDistanceKm: km }));
+      }
+    } catch (err) {
+      console.error("Directions request failed", err);
+    }
+  }
 
   // Find the driver profile linked to current user
   const { data: drivers } = useQuery({
@@ -278,8 +309,62 @@ export default function DriverDashboard() {
         {showCreateTrip && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><label className="cosmic-label">Source</label><input className="cosmic-input" value={tripForm.source} onChange={(e) => setTripForm({ ...tripForm, source: e.target.value })} placeholder="e.g. Mumbai Warehouse" /></div>
-              <div><label className="cosmic-label">Destination</label><input className="cosmic-input" value={tripForm.destination} onChange={(e) => setTripForm({ ...tripForm, destination: e.target.value })} placeholder="e.g. Delhi Hub" /></div>
+              <div>
+                <label className="cosmic-label">Source</label>
+                {isLoaded ? (
+                  <Autocomplete
+                    onLoad={setSourceAutocomplete}
+                    onPlaceChanged={() => {
+                      if (sourceAutocomplete !== null) {
+                        const place = sourceAutocomplete.getPlace();
+                        setTripForm(prev => ({ ...prev, source: place.formatted_address || place.name || "" }));
+                      }
+                    }}
+                  >
+                    <input className="cosmic-input" value={tripForm.source} onChange={(e) => setTripForm({ ...tripForm, source: e.target.value })} placeholder="Search starting location..." />
+                  </Autocomplete>
+                ) : (
+                  <input className="cosmic-input" disabled placeholder="Loading Maps..." />
+                )}
+              </div>
+              
+              <div>
+                <label className="cosmic-label">Destination</label>
+                {isLoaded ? (
+                  <Autocomplete
+                    onLoad={setDestAutocomplete}
+                    onPlaceChanged={() => {
+                      if (destAutocomplete !== null) {
+                        const place = destAutocomplete.getPlace();
+                        setTripForm(prev => ({ ...prev, destination: place.formatted_address || place.name || "" }));
+                      }
+                    }}
+                  >
+                    <input className="cosmic-input" value={tripForm.destination} onChange={(e) => setTripForm({ ...tripForm, destination: e.target.value })} placeholder="Search destination..." />
+                  </Autocomplete>
+                ) : (
+                  <input className="cosmic-input" disabled placeholder="Loading Maps..." />
+                )}
+              </div>
+              
+              <div className="md:col-span-2">
+                 <button onClick={calculateRoute} className="btn-secondary w-full py-2 mb-2 flex items-center justify-center gap-2" disabled={!tripForm.source || !tripForm.destination}>
+                   <Map className="w-4 h-4" /> Calculate Route & Distance
+                 </button>
+                 
+                 {isLoaded && directionsResponse && (
+                   <div className="w-full h-64 rounded-xl overflow-hidden border border-[var(--border-subtle)] mb-4 relative z-0">
+                     <GoogleMap
+                       mapContainerStyle={{ width: "100%", height: "100%" }}
+                       zoom={10}
+                       options={{ disableDefaultUI: true, styles: [ { elementType: "geometry", stylers: [{ color: "#242f3e" }] }, { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] }, { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] } ] }}
+                     >
+                       <DirectionsRenderer directions={directionsResponse} options={{ polylineOptions: { strokeColor: "#7C8CFF", strokeWeight: 4 } }} />
+                     </GoogleMap>
+                   </div>
+                 )}
+              </div>
+
               <div>
                 <label className="cosmic-label">Vehicle</label>
                 <select className="cosmic-select" value={tripForm.vehicleId} onChange={(e) => setTripForm({ ...tripForm, vehicleId: e.target.value })}>
@@ -290,7 +375,7 @@ export default function DriverDashboard() {
                 </select>
               </div>
               <div><label className="cosmic-label">Cargo Weight (kg)</label><input type="number" className="cosmic-input" value={tripForm.cargoWeightKg} onChange={(e) => setTripForm({ ...tripForm, cargoWeightKg: e.target.value })} placeholder="e.g. 18000" /></div>
-              <div><label className="cosmic-label">Planned Distance (km)</label><input type="number" className="cosmic-input" value={tripForm.plannedDistanceKm} onChange={(e) => setTripForm({ ...tripForm, plannedDistanceKm: e.target.value })} placeholder="e.g. 280" /></div>
+              <div><label className="cosmic-label">Planned Distance (km)</label><input type="number" className="cosmic-input" value={tripForm.plannedDistanceKm} onChange={(e) => setTripForm({ ...tripForm, plannedDistanceKm: e.target.value })} placeholder="Auto-calculated or enter manually" /></div>
             </div>
             <button onClick={() => createTrip.mutate()} className="btn-primary" disabled={createTrip.isPending}>
               {createTrip.isPending ? "Creating..." : "Create Trip"}
