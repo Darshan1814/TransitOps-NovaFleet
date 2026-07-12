@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/requireRole";
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await requireRole("SAFETY_OFFICER", "ADMIN");
-    const { id } = params;
+    const { id } = await params;
 
     const proof = await prisma.proofDocument.findUnique({ where: { id } });
     if (!proof) return NextResponse.json({ error: "Proof not found" }, { status: 404 });

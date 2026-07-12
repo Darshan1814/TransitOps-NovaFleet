@@ -200,7 +200,7 @@ export default function SafetyDashboard() {
               return (
                 <div key={proof.id} className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-panel-2)]">
                   <div className="flex gap-4 items-center">
-                    {proof.fileUrl && proof.fileUrl.startsWith('data:image') && (
+                    {proof.fileUrl?.startsWith('data:image') && (
                       <img src={proof.fileUrl} alt="Document" className="w-16 h-16 object-cover rounded border border-[var(--border-subtle)]" />
                     )}
                     <div>
@@ -210,7 +210,7 @@ export default function SafetyDashboard() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    {proof.fileUrl && proof.fileUrl.startsWith('data:image') && (
+                    {proof.fileUrl?.startsWith('data:image') && (
                       <button onClick={() => setSelectedDocUrl(proof.fileUrl)} className="btn-secondary text-xs px-3">
                         View Document
                       </button>
@@ -240,7 +240,13 @@ export default function SafetyDashboard() {
       )}
 
       {selectedDocUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setSelectedDocUrl(null)}>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" 
+          onClick={() => setSelectedDocUrl(null)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter') setSelectedDocUrl(null); }}
+        >
           <div className="relative max-w-4xl max-h-[90vh] overflow-auto">
             <button className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/70" onClick={() => setSelectedDocUrl(null)}>
               <X className="w-6 h-6" />

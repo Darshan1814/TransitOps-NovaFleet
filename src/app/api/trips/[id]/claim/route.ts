@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/requireRole";
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireRole("DRIVER");
-    const { id } = params;
+    const { id } = await params;
 
     // Find the driver profile for the current user
     const driver = await prisma.driver.findUnique({ where: { userId: user.id } });
