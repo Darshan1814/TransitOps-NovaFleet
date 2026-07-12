@@ -6,7 +6,7 @@ import { KPICard } from "@/components/dashboard/KPICard";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { DollarSign, TrendingUp, TrendingDown, FileText, Download, X } from "lucide-react";
 import { motion } from "framer-motion";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function FinanceDashboard() {
   const [reportData, setReportData] = useState<any>(null);
@@ -120,11 +120,14 @@ export default function FinanceDashboard() {
                 />
                 <Bar dataKey="roi">
                   {([...topVehicles, ...bottomVehicles].sort((a, b) => b.roi - a.roi)).map((entry, index) => (
-                    <cell key={`cell-${index}`} fill={entry.roi >= 0 ? "var(--success)" : "var(--danger)"} />
+                    <Cell key={`cell-${index}`} fill={entry.roi >= 0 ? "var(--success)" : "var(--danger)"} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+          </div>
+          <div className="mt-4 p-3 bg-[var(--bg-panel-2)] rounded-lg text-xs text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+            <strong>Graph Explanation:</strong> This chart compares your fleet's most and least profitable vehicles by ROI (Return on Investment). Green bars indicate positive ROI over operational/maintenance costs, while red bars show vehicles actively losing money. Use this data to determine which vehicles to dispatch or retire.
           </div>
         </motion.div>
 

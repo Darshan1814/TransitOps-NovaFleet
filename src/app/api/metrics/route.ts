@@ -27,16 +27,16 @@ export async function GET() {
     // 2. Fuel Efficiency Trend (Last 7 Days)
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const recentTrips = await prisma.trip.findMany({
-      where: { status: "COMPLETED", endDate: { gte: thirtyDaysAgo }, actualDistanceKm: { not: null }, fuelConsumedL: { not: null } },
-      select: { endDate: true, actualDistanceKm: true, fuelConsumedL: true },
-      orderBy: { endDate: "asc" }
+      where: { status: "COMPLETED", completedAt: { gte: thirtyDaysAgo }, actualDistanceKm: { not: null }, fuelConsumedL: { not: null } },
+      select: { completedAt: true, actualDistanceKm: true, fuelConsumedL: true },
+      orderBy: { completedAt: "asc" }
     });
     
     // Group by day for the trend chart
     const fuelTrendMap = new Map<string, { dist: number, fuel: number }>();
     recentTrips.forEach(t => {
-      if (!t.endDate) return;
-      const day = t.endDate.toISOString().split("T")[0];
+      if (!t.completedAt) return;
+      const day = t.completedAt.toISOString().split("T")[0];
       const current = fuelTrendMap.get(day) || { dist: 0, fuel: 0 };
       current.dist += Number(t.actualDistanceKm);
       current.fuel += Number(t.fuelConsumedL);
@@ -53,7 +53,7 @@ export async function GET() {
     });
     const maintenanceSummary = {
       open: maintenanceLogs.filter(l => l.status === "OPEN").length,
-      closed: maintenanceLogs.filter(l => l.status === "COMPLETED").length,
+      closed: maintenanceLogs.filter(l => l.status === "CLOSED").length,
       avgCost: maintenanceLogs.length > 0 ? maintenanceLogs.reduce((s, l) => s + Number(l.cost || 0), 0) / maintenanceLogs.length : 0
     };
 

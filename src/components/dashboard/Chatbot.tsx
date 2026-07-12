@@ -4,6 +4,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, X, Send, Download, BarChart2 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { BarChart, Bar, Cell, XAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +13,21 @@ export function Chatbot() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
+
+  const { data: drivers } = useQuery({
+    queryKey: ["drivers"],
+    queryFn: async () => {
+      const res = await fetch("/api/drivers");
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: isOpen, // only fetch if chat is open
+  });
+
+  // Hide chatbot on Ledger Deck (Finance)
+  if (pathname === "/dashboard/finance") {
+    return null;
+  }
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,9 +117,23 @@ export function Chatbot() {
                     </button>
                   )}
                   {msg.special === "graph" && (
-                    <div className="mt-2 p-3 bg-black/30 border border-[var(--border)] rounded flex items-center justify-center text-[var(--accent-glow)] text-xs">
-                      <BarChart2 className="w-4 h-4 mr-2" />
-                      Dynamic graph visualization loaded
+                    <div className="mt-2 p-3 bg-[var(--bg-panel)] border border-[var(--border)] rounded flex flex-col h-48">
+                      <span className="text-xs font-bold text-center mb-2 text-[var(--accent-glow)]">Driver Safety Analysis</span>
+                      <div className="flex-1 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={drivers?.slice(0, 5) || []}>
+                            <XAxis dataKey="fullName" tick={{ fontSize: 9, fill: "var(--text-secondary)" }} />
+                            <Tooltip 
+                              contentStyle={{ background: "var(--bg-panel)", border: "1px solid var(--border-subtle)", borderRadius: "8px", fontSize: "10px" }}
+                            />
+                            <Bar dataKey="safetyScore">
+                              {(drivers?.slice(0, 5) || []).map((entry: any, index: number) => (
+                                <Cell key={`cell-${index}`} fill={entry.safetyScore > 80 ? "var(--success)" : "var(--danger)"} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
                     </div>
                   )}
                 </div>
