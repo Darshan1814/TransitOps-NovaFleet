@@ -115,6 +115,7 @@ export default function FinanceDashboard() {
                 <YAxis tick={{ fontSize: 10, fill: "var(--text-secondary)" }} tickFormatter={(v) => `${v}%`} />
                 <Tooltip
                   contentStyle={{ background: "var(--bg-panel)", border: "1px solid var(--border-subtle)", borderRadius: "8px", fontSize: "12px", color: "var(--text-primary)" }}
+                  itemStyle={{ color: "var(--text-primary)" }}
                   formatter={(v: number) => [`${v.toFixed(2)}%`, "ROI"]}
                 />
                 <Bar dataKey="roi">

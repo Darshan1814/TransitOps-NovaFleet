@@ -1,0 +1,34 @@
+name: Trivy Security Scan
+
+on:
+  push:
+    branches:
+      - main
+      - dev-features
+      - darshan
+      - Janhavi
+      - swamini
+      - Arya
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 0 * * *' # Run daily at midnight
+
+jobs:
+  trivy:
+    name: Trivy Vulnerability Scanner
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner in fs mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'

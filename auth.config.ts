@@ -24,5 +24,5 @@ export const authConfig = {
   pages: {
     signIn: "/login",
   },
-  trustHost: true,
+  trustHost: process.env.NODE_ENV === "development",
 } satisfies NextAuthConfig;
