@@ -463,10 +463,6 @@ novafleet/
 
 ## 👥 Contributors
 
-<a href="https://github.com/Darshan1814">
-  <img src="https://github.com/Darshan1814.png" width="60" style="border-radius:50%" alt="Darshan1814"/>
-</a>
-
 Built with ☄️ for a transport-operations hackathon — pull requests and issue reports welcome.
 
 ## 📄 License
