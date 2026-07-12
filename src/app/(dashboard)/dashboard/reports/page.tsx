@@ -35,7 +35,7 @@ export default function ComprehensiveReport() {
     return <div className="p-8 text-center" style={{ color: "var(--text-tertiary)" }}>Compiling Comprehensive Report...</div>;
   }
 
-  if (isError || !data) {
+  if (isError && !data) {
     return (
       <div className="p-8 text-center" style={{ color: "var(--danger)" }}>
         Failed to fetch metrics data. Please ensure the backend is running properly.
@@ -158,7 +158,10 @@ export default function ComprehensiveReport() {
                       <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip
+                    contentStyle={{ background: "var(--bg-panel)", border: "1px solid var(--border-subtle)", borderRadius: "8px", fontSize: "12px", color: "var(--text-primary)" }}
+                    itemStyle={{ color: "var(--text-primary)" }}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -173,7 +176,11 @@ export default function ComprehensiveReport() {
                   <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                   <XAxis dataKey="registrationNumber" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
-                  <Tooltip formatter={(v: number) => [`${v.toFixed(2)}%`, "ROI"]} />
+                  <Tooltip 
+                    contentStyle={{ background: "var(--bg-panel)", border: "1px solid var(--border-subtle)", borderRadius: "8px", fontSize: "12px", color: "var(--text-primary)" }}
+                    itemStyle={{ color: "var(--text-primary)" }}
+                    formatter={(v: number) => [`${v.toFixed(2)}%`, "ROI"]} 
+                  />
                   <Bar dataKey="roi" fill="#7C8CFF" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
