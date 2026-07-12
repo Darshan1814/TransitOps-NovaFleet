@@ -193,6 +193,23 @@ export default function LoginPage() {
                 "Launch Mission"
               )}
             </button>
+
+            <div className="relative mt-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[var(--border)]"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-[var(--bg-panel)] text-[var(--text-tertiary)]">Or continue with</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-[var(--border-subtle)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--bg-panel-2)] transition-colors"
+            >
+              <span className="font-semibold text-white">Enterprise</span>
+              <span className="text-sm font-medium">Single Sign-On</span>
+            </button>
           </form>
 
           {/* Demo Accounts */}
