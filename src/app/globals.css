@@ -198,15 +198,15 @@ h6 {
 }
 
 .status-draft {
-  background: rgba(107, 112, 137, 0.12);
-  color: var(--text-tertiary);
-  border: 1px solid rgba(107, 112, 137, 0.25);
+  background: rgba(148, 163, 184, 0.15);
+  color: #94A3B8;
+  border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
 .status-dispatched {
-  background: rgba(124, 140, 255, 0.12);
-  color: var(--accent-glow);
-  border: 1px solid rgba(124, 140, 255, 0.25);
+  background: rgba(129, 140, 248, 0.15);
+  color: #818CF8;
+  border: 1px solid rgba(129, 140, 248, 0.3);
 }
 
 .status-completed {
@@ -234,6 +234,20 @@ h6 {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-tertiary);
+}
+
+/* ====================================
+   RECHARTS TOOLTIP FIX
+   ==================================== */
+.recharts-default-tooltip {
+  background-color: var(--bg-panel) !important;
+  border-color: var(--border) !important;
+  border-radius: 8px !important;
+  color: var(--text-primary) !important;
+}
+
+.recharts-tooltip-item {
+  color: var(--text-primary) !important;
 }
 
 /* ====================================

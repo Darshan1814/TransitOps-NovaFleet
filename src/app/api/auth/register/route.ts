@@ -32,13 +32,17 @@ export async function POST(request: Request) {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
+    // Enforce safe roles (prevent privilege escalation)
+    const safeRoles = ["DRIVER", "SAFETY_OFFICER"];
+    const finalRole = safeRoles.includes(role) ? role : "DRIVER";
+
     // 4. Create user in DB
     const newUser = await prisma.user.create({
       data: {
         fullName,
         email,
         passwordHash,
-        role: role as UserRole,
+        role: finalRole as UserRole,
         region: region || "NA",
         isActive: true, // Default to true so they can login immediately
       },

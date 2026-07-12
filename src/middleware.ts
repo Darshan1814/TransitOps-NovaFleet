@@ -1,4 +1,7 @@
-import { auth } from "../auth";
+import NextAuth from "next-auth";
+import { authConfig } from "../auth.config";
+
+const { auth } = NextAuth(authConfig);
 import { NextResponse } from "next/server";
 
 const roleHome: Record<string, string> = {
@@ -33,8 +36,8 @@ export default auth((req) => {
       FLEET_MANAGER: ["fleet"],
       DRIVER: ["driver"],
       SAFETY_OFFICER: ["safety"],
-      FINANCIAL_ANALYST: ["finance"],
-      ADMIN: ["admin", "fleet", "driver", "safety", "finance"], // Admin can access all
+      FINANCIAL_ANALYST: ["finance", "reports"],
+      ADMIN: ["admin", "fleet", "driver", "safety", "finance", "reports"], // Admin can access all
     };
 
     const allowedPaths = rolePathMap[userRole] || [];
