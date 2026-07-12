@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Rocket, Eye, EyeOff, AlertCircle } from "lucide-react";
+import Link from "next/link";
 
 const rolePaths: Record<string, string> = {
   FLEET_MANAGER: "/dashboard/fleet",
@@ -224,9 +225,12 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="text-center mt-6 text-xs" style={{ color: "var(--text-tertiary)" }}>
-          All accounts use password: <code className="px-1.5 py-0.5 rounded" style={{ background: "var(--bg-panel-2)" }}>password123</code>
-        </p>
+        <div className="text-center mt-6 text-sm" style={{ color: "var(--text-secondary)" }}>
+          Don't have an account?{" "}
+          <Link href="/signup" className="font-medium hover:text-white transition-colors" style={{ color: "var(--accent-glow)" }}>
+            Sign up
+          </Link>
+        </div>
       </motion.div>
     </div>
   );

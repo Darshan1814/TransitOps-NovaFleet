@@ -1,12 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { KPICard } from "@/components/dashboard/KPICard";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { formatCurrency, formatNumber, formatDateTime } from "@/lib/utils";
 import {
   Truck, Users, Wrench, Rocket, Clock, Gauge,
-  TrendingUp, Activity, FileText,
+  TrendingUp, Activity, FileText, Plus, X
 } from "lucide-react";
 import { motion } from "framer-motion";
 import {
@@ -15,6 +16,41 @@ import {
 } from "recharts";
 
 export default function FleetDashboard() {
+  const queryClient = useQueryClient();
+  const [isAddVehicleOpen, setIsAddVehicleOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [vehicleForm, setVehicleForm] = useState({
+    registrationNumber: "", nameModel: "", vehicleType: "Van", maxLoadCapacityKg: "", acquisitionCost: "", region: "NA"
+  });
+
+  const addVehicleMutation = useMutation({
+    mutationFn: async (newVehicle: any) => {
+      const res = await fetch("/api/vehicles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newVehicle),
+      });
+      if (!res.ok) throw new Error("Failed to add vehicle");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["metrics"] });
+      setIsAddVehicleOpen(false);
+      setVehicleForm({ registrationNumber: "", nameModel: "", vehicleType: "Van", maxLoadCapacityKg: "", acquisitionCost: "", region: "NA" });
+    },
+  });
+
+  const handleAddVehicle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    await addVehicleMutation.mutateAsync({
+      ...vehicleForm,
+      maxLoadCapacityKg: Number(vehicleForm.maxLoadCapacityKg),
+      acquisitionCost: Number(vehicleForm.acquisitionCost)
+    });
+    setIsSubmitting(false);
+  };
+
   const { data, isLoading } = useQuery({
     queryKey: ["metrics"],
     queryFn: async () => {
@@ -64,6 +100,66 @@ export default function FleetDashboard() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">Fleet Overview</h2>
+        <button onClick={() => setIsAddVehicleOpen(true)} className="btn-primary">
+          <Plus className="w-4 h-4" /> Register Vehicle
+        </button>
+      </div>
+
+      {isAddVehicleOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="cosmic-panel p-6 w-full max-w-lg bg-[#0D0F16]">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold">Register New Vehicle</h3>
+              <button onClick={() => setIsAddVehicleOpen(false)} className="text-[var(--text-tertiary)] hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+            <form onSubmit={handleAddVehicle} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="cosmic-label">Registration Number</label>
+                  <input type="text" required className="cosmic-input" value={vehicleForm.registrationNumber} onChange={e => setVehicleForm({...vehicleForm, registrationNumber: e.target.value})} placeholder="VAN-01" />
+                </div>
+                <div>
+                  <label className="cosmic-label">Model Name</label>
+                  <input type="text" required className="cosmic-input" value={vehicleForm.nameModel} onChange={e => setVehicleForm({...vehicleForm, nameModel: e.target.value})} placeholder="Ford Transit" />
+                </div>
+                <div>
+                  <label className="cosmic-label">Type</label>
+                  <select className="cosmic-select" value={vehicleForm.vehicleType} onChange={e => setVehicleForm({...vehicleForm, vehicleType: e.target.value})}>
+                    <option value="Van">Van</option>
+                    <option value="Truck">Truck</option>
+                    <option value="Semi">Semi-Trailer</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="cosmic-label">Region</label>
+                  <select className="cosmic-select" value={vehicleForm.region} onChange={e => setVehicleForm({...vehicleForm, region: e.target.value})}>
+                    <option value="NA">North America</option>
+                    <option value="EU">Europe</option>
+                    <option value="APAC">APAC</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="cosmic-label">Max Load (kg)</label>
+                  <input type="number" required min="1" className="cosmic-input" value={vehicleForm.maxLoadCapacityKg} onChange={e => setVehicleForm({...vehicleForm, maxLoadCapacityKg: e.target.value})} />
+                </div>
+                <div>
+                  <label className="cosmic-label">Acquisition Cost ($)</label>
+                  <input type="number" required min="1" className="cosmic-input" value={vehicleForm.acquisitionCost} onChange={e => setVehicleForm({...vehicleForm, acquisitionCost: e.target.value})} />
+                </div>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsAddVehicleOpen(false)} className="btn-secondary">Cancel</button>
+                <button type="submit" disabled={isSubmitting} className="btn-primary">
+                  {isSubmitting ? "Registering..." : "Register Vehicle"}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <KPICard
