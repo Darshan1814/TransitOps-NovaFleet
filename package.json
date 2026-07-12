@@ -17,6 +17,7 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.0.0",
     "@prisma/client": "^6.9.0",
+    "@react-google-maps/api": "^2.20.8",
     "@tanstack/react-query": "^5.62.0",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",

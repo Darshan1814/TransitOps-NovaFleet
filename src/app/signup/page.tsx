@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Rocket, Mail, Lock, User, MapPin, Briefcase } from "lucide-react";
 import Link from "next/link";
+import { useLoadScript, Autocomplete } from "@react-google-maps/api";
+
+const libraries: ("places")[] = ["places"];
 
 export default function SignupPage() {
   const router = useRouter();
@@ -16,8 +19,22 @@ export default function SignupPage() {
     email: "",
     password: "",
     role: "DRIVER",
-    region: "NA",
+    region: "",
   });
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+    libraries,
+  });
+
+  const [autocomplete, setAutocomplete] = useState<any>(null);
+
+  const onPlaceChanged = () => {
+    if (autocomplete !== null) {
+      const place = autocomplete.getPlace();
+      setFormData((prev) => ({ ...prev, region: place.formatted_address || place.name || "" }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,6 +174,9 @@ export default function SignupPage() {
                   >
                     <option value="DRIVER">Driver</option>
                     <option value="SAFETY_OFFICER">Safety Officer</option>
+                    <option value="FLEET_MANAGER">Fleet Manager</option>
+                    <option value="FINANCIAL_ANALYST">Financial Analyst</option>
+                    <option value="ADMIN">Admin</option>
                   </select>
                 </div>
               </div>
@@ -164,17 +184,25 @@ export default function SignupPage() {
               <div>
                 <label className="cosmic-label">Region</label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
-                  <select
-                    name="region"
-                    value={formData.region}
-                    onChange={handleChange}
-                    className="cosmic-select pl-10"
-                  >
-                    <option value="NA">North America</option>
-                    <option value="EU">Europe</option>
-                    <option value="APAC">APAC</option>
-                  </select>
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)] z-10" />
+                  {isLoaded ? (
+                    <Autocomplete
+                      onLoad={setAutocomplete}
+                      onPlaceChanged={onPlaceChanged}
+                    >
+                      <input
+                        type="text"
+                        name="region"
+                        value={formData.region}
+                        onChange={handleChange}
+                        className="cosmic-input pl-10"
+                        placeholder="Search city/region"
+                        required
+                      />
+                    </Autocomplete>
+                  ) : (
+                    <input type="text" className="cosmic-input pl-10" disabled placeholder="Loading Maps..." />
+                  )}
                 </div>
               </div>
             </div>

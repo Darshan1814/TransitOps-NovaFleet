@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 export default function SafetyDashboard() {
   const queryClient = useQueryClient();
   const [isAddDriverOpen, setIsAddDriverOpen] = useState(false);
+  const [selectedDocUrl, setSelectedDocUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [driverForm, setDriverForm] = useState({
     fullName: "", licenseNumber: "", licenseCategory: "Class A", licenseExpiryDate: "", contactNumber: "", region: "NA"
@@ -62,6 +63,18 @@ export default function SafetyDashboard() {
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/proofs/${id}/approve`, { method: "POST" });
       if (!res.ok) throw new Error("Failed to approve");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["proofs"] });
+      queryClient.invalidateQueries({ queryKey: ["drivers"] });
+    },
+  });
+
+  const rejectProofMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/proofs/${id}/reject`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed to reject");
       return res.json();
     },
     onSuccess: () => {
@@ -196,19 +209,45 @@ export default function SafetyDashboard() {
                       <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>Submitted: {formatDateTime(proof.submittedAt)}</p>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => approveProofMutation.mutate(proof.id)} 
-                    disabled={approveProofMutation.isPending}
-                    className="btn-success text-xs"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    Approve
-                  </button>
+                  <div className="flex gap-2">
+                    {proof.fileUrl && proof.fileUrl.startsWith('data:image') && (
+                      <button onClick={() => setSelectedDocUrl(proof.fileUrl)} className="btn-secondary text-xs px-3">
+                        View Document
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => approveProofMutation.mutate(proof.id)} 
+                      disabled={approveProofMutation.isPending || rejectProofMutation.isPending}
+                      className="btn-success text-xs"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      Approve
+                    </button>
+                    <button 
+                      onClick={() => rejectProofMutation.mutate(proof.id)} 
+                      disabled={approveProofMutation.isPending || rejectProofMutation.isPending}
+                      className="btn-danger text-xs bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                    >
+                      <XCircle className="w-4 h-4 mr-1" />
+                      Reject
+                    </button>
+                  </div>
                 </div>
               );
             })}
           </div>
         </motion.div>
+      )}
+
+      {selectedDocUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setSelectedDocUrl(null)}>
+          <div className="relative max-w-4xl max-h-[90vh] overflow-auto">
+            <button className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-black/70" onClick={() => setSelectedDocUrl(null)}>
+              <X className="w-6 h-6" />
+            </button>
+            <img src={selectedDocUrl} alt="Document Verification" className="w-full h-auto rounded-xl border border-[var(--border-subtle)]" />
+          </div>
+        </div>
       )}
 
       {/* Driver List & Safety Scores */}
