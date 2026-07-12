@@ -1,13 +1,33 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { KPICard } from "@/components/dashboard/KPICard";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
-import { DollarSign, TrendingUp, TrendingDown, FileText } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, FileText, Download, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function FinanceDashboard() {
+  const [reportData, setReportData] = useState<any>(null);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+
+  const generateReportMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/reports/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportType: "FINANCE" })
+      });
+      if (!res.ok) throw new Error("Failed to generate report");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setReportData(data);
+      setIsReportOpen(true);
+    }
+  });
+
   const { data, isLoading } = useQuery({
     queryKey: ["metrics"],
     queryFn: async () => {
@@ -36,6 +56,43 @@ export default function FinanceDashboard() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">Financial Overview</h2>
+        <button 
+          onClick={() => generateReportMutation.mutate()} 
+          disabled={generateReportMutation.isPending}
+          className="btn-primary"
+        >
+          {generateReportMutation.isPending ? (
+            <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generating...</span>
+          ) : (
+            <span className="flex items-center gap-2"><FileText className="w-4 h-4" /> Generate AI Report</span>
+          )}
+        </button>
+      </div>
+
+      {isReportOpen && reportData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="cosmic-panel p-6 w-full max-w-2xl bg-[#0D0F16]">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[var(--accent-glow)]" />
+                Financial AI Report
+              </h3>
+              <button onClick={() => setIsReportOpen(false)} className="text-[var(--text-tertiary)] hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+              <div className="p-4 rounded-lg bg-[var(--bg-panel-2)] border border-[var(--border-subtle)] whitespace-pre-wrap text-sm" style={{ color: "var(--text-primary)" }}>
+                {reportData.narrative}
+              </div>
+              <div className="text-xs text-[var(--text-tertiary)] flex justify-between">
+                <span>Generated at: {formatDateTime(reportData.generatedAt)}</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard title="Total Operational Cost" value={formatCurrency(metrics?.operationalCost || 0)} icon={DollarSign} color="glow" />
