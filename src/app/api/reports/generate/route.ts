@@ -74,7 +74,9 @@ export async function POST(req: NextRequest) {
                   "Rules: (1) Never invent, estimate, or alter any number — use the given figures exactly as provided. " +
                   "(2) Write in a formal, concise, black-and-white-report tone suitable for executives and auditors. " +
                   "(3) Structure your response as: a 2-3 sentence Executive Summary, then 3-5 bullet 'Key Observations', " +
-                  "then 1-2 sentence 'Recommendation'. (4) Output plain text only, no markdown symbols, no emojis.",
+                  "then 1-2 sentence 'Recommendation'. " +
+                  "(4) ANOMALY DETECTION: If you notice any unusual metrics (e.g., fuel efficiency dropping, high number of pending approvals, or high maintenance costs relative to fuel), explicitly highlight it in a section called 'ANOMALY FLAG'. " +
+                  "(5) Output plain text only, no markdown symbols, no emojis.",
               },
               {
                 role: "user",
