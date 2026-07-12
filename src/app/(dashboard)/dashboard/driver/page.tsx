@@ -78,6 +78,13 @@ export default function DriverDashboard() {
     queryFn: async () => { const res = await fetch("/api/vehicles?status=AVAILABLE"); return res.json(); },
   });
 
+  const { data: allTrips } = useQuery({
+    queryKey: ["trips-all"],
+    queryFn: async () => { const res = await fetch("/api/trips"); return res.json(); },
+  });
+
+  const openTrips = allTrips?.filter((t: any) => !t.driverId && t.status === "DRAFT") || [];
+
   const activeTrip = myTrips?.find((t: { status: string }) => t.status === "DISPATCHED");
   const draftTrips = myTrips?.filter((t: { status: string }) => t.status === "DRAFT") || [];
   const completedTrips = myTrips?.filter((t: { status: string }) => t.status === "COMPLETED") || [];
@@ -151,6 +158,20 @@ export default function DriverDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-trips"] });
+      queryClient.invalidateQueries({ queryKey: ["vehicles-available"] });
+    },
+    onError: (e) => setError(e.message),
+  });
+
+  const claimTripMut = useMutation({
+    mutationFn: async (tripId: string) => {
+      const res = await fetch(`/api/trips/${tripId}/claim`, { method: "POST" });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-trips"] });
+      queryClient.invalidateQueries({ queryKey: ["trips-all"] });
       queryClient.invalidateQueries({ queryKey: ["vehicles-available"] });
     },
     onError: (e) => setError(e.message),
@@ -403,6 +424,40 @@ export default function DriverDashboard() {
           </div>
         )}
       </motion.div>
+
+      {/* Available Open Trips */}
+      {openTrips.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="cosmic-panel p-5 border border-[var(--accent-glow)]">
+          <h3 className="text-sm font-semibold mb-4 text-[var(--accent-glow)] flex items-center gap-2" style={{ fontFamily: "var(--font-heading)" }}>
+            <Rocket className="w-4 h-4" /> Available Open Trips
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {openTrips.map((trip: any) => (
+              <div key={trip.id} className="p-4 rounded-xl bg-[var(--bg-panel-2)] border border-[var(--border-subtle)] flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs font-bold text-[var(--text-primary)]">{trip.vehicle?.nameModel} ({trip.vehicle?.registrationNumber})</span>
+                    <span className="text-[10px] bg-[var(--accent-glow)]/20 text-[var(--accent-glow)] px-2 py-0.5 rounded-full">{trip.cargoWeightKg}kg</span>
+                  </div>
+                  <div className="text-xs text-[var(--text-secondary)] mb-1 flex items-center gap-2">
+                    <MapPin className="w-3 h-3" /> {trip.source}
+                  </div>
+                  <div className="text-xs text-[var(--text-secondary)] mb-4 flex items-center gap-2">
+                    <MapPin className="w-3 h-3 text-[var(--accent-glow)]" /> {trip.destination}
+                  </div>
+                </div>
+                <button 
+                  onClick={() => claimTripMut.mutate(trip.id)} 
+                  disabled={claimTripMut.isPending || !!activeTrip}
+                  className="btn-primary w-full text-xs py-2 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {claimTripMut.isPending ? "Claiming..." : "Claim Trip"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Trip History */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="cosmic-panel p-5">

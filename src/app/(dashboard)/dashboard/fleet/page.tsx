@@ -18,9 +18,13 @@ import {
 export default function FleetDashboard() {
   const queryClient = useQueryClient();
   const [isAddVehicleOpen, setIsAddVehicleOpen] = useState(false);
+  const [isCreateTripOpen, setIsCreateTripOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [vehicleForm, setVehicleForm] = useState({
     registrationNumber: "", nameModel: "", vehicleType: "Van", maxLoadCapacityKg: "", acquisitionCost: "", region: "NA"
+  });
+  const [tripForm, setTripForm] = useState({
+    source: "", destination: "", vehicleId: "", cargoWeightKg: "", plannedDistanceKm: ""
   });
 
   const addVehicleMutation = useMutation({
@@ -47,6 +51,42 @@ export default function FleetDashboard() {
       ...vehicleForm,
       maxLoadCapacityKg: Number(vehicleForm.maxLoadCapacityKg),
       acquisitionCost: Number(vehicleForm.acquisitionCost)
+    });
+    setIsSubmitting(false);
+  };
+
+  const createTripMutation = useMutation({
+    mutationFn: async (newTrip: any) => {
+      const res = await fetch("/api/trips", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...newTrip,
+          driverId: null // Open Trip
+        }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to create trip");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trips-all"] });
+      queryClient.invalidateQueries({ queryKey: ["trips-active"] });
+      queryClient.invalidateQueries({ queryKey: ["metrics"] });
+      setIsCreateTripOpen(false);
+      setTripForm({ source: "", destination: "", vehicleId: "", cargoWeightKg: "", plannedDistanceKm: "" });
+    },
+  });
+
+  const handleCreateTrip = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    await createTripMutation.mutateAsync({
+      ...tripForm,
+      cargoWeightKg: Number(tripForm.cargoWeightKg),
+      plannedDistanceKm: Number(tripForm.plannedDistanceKm)
     });
     setIsSubmitting(false);
   };
@@ -78,6 +118,15 @@ export default function FleetDashboard() {
     },
   });
 
+  const { data: availableVehicles } = useQuery({
+    queryKey: ["vehicles-available"],
+    queryFn: async () => {
+      const res = await fetch("/api/vehicles?status=AVAILABLE");
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -101,10 +150,15 @@ export default function FleetDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Fleet Overview</h2>
-        <button onClick={() => setIsAddVehicleOpen(true)} className="btn-primary">
-          <Plus className="w-4 h-4" /> Register Vehicle
-        </button>
+        <h2 className="text-xl font-bold">Fleet Operations</h2>
+        <div className="flex gap-2">
+          <button onClick={() => setIsCreateTripOpen(true)} className="btn-secondary">
+            <Plus className="w-4 h-4" /> Open Dispatch Trip
+          </button>
+          <button onClick={() => setIsAddVehicleOpen(true)} className="btn-primary">
+            <Plus className="w-4 h-4" /> Register Vehicle
+          </button>
+        </div>
       </div>
 
       {isAddVehicleOpen && (
@@ -153,6 +207,53 @@ export default function FleetDashboard() {
                 <button type="button" onClick={() => setIsAddVehicleOpen(false)} className="btn-secondary">Cancel</button>
                 <button type="submit" disabled={isSubmitting} className="btn-primary">
                   {isSubmitting ? "Registering..." : "Register Vehicle"}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {isCreateTripOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="cosmic-panel p-6 w-full max-w-lg bg-[#0D0F16]">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold">Create Open Dispatch Trip</h3>
+              <button onClick={() => setIsCreateTripOpen(false)} className="text-[var(--text-tertiary)] hover:text-white"><X className="w-5 h-5" /></button>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] mb-4">This trip will be broadcasted to all drivers. The first driver to claim it will be assigned.</p>
+            <form onSubmit={handleCreateTrip} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="cosmic-label">Select Available Vehicle</label>
+                  <select required className="cosmic-select" value={tripForm.vehicleId} onChange={e => setTripForm({...tripForm, vehicleId: e.target.value})}>
+                    <option value="">Select a vehicle...</option>
+                    {availableVehicles?.map((v: any) => (
+                      <option key={v.id} value={v.id}>{v.registrationNumber} - {v.nameModel} ({v.maxLoadCapacityKg}kg cap)</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="cosmic-label">Source</label>
+                  <input type="text" required className="cosmic-input" value={tripForm.source} onChange={e => setTripForm({...tripForm, source: e.target.value})} placeholder="Warehouse A" />
+                </div>
+                <div>
+                  <label className="cosmic-label">Destination</label>
+                  <input type="text" required className="cosmic-input" value={tripForm.destination} onChange={e => setTripForm({...tripForm, destination: e.target.value})} placeholder="Store 15" />
+                </div>
+                <div>
+                  <label className="cosmic-label">Cargo Weight (kg)</label>
+                  <input type="number" required min="1" className="cosmic-input" value={tripForm.cargoWeightKg} onChange={e => setTripForm({...tripForm, cargoWeightKg: e.target.value})} />
+                </div>
+                <div>
+                  <label className="cosmic-label">Est. Distance (km)</label>
+                  <input type="number" required min="1" className="cosmic-input" value={tripForm.plannedDistanceKm} onChange={e => setTripForm({...tripForm, plannedDistanceKm: e.target.value})} />
+                </div>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsCreateTripOpen(false)} className="btn-secondary">Cancel</button>
+                <button type="submit" disabled={isSubmitting} className="btn-primary">
+                  {isSubmitting ? "Broadcasting..." : "Broadcast to Drivers"}
                 </button>
               </div>
             </form>

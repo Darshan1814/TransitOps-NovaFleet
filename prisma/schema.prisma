@@ -109,8 +109,8 @@ model Trip {
   destination       String
   vehicleId         String
   vehicle           Vehicle    @relation(fields: [vehicleId], references: [id])
-  driverId          String
-  driver            Driver     @relation(fields: [driverId], references: [id])
+  driverId          String?
+  driver            Driver?    @relation(fields: [driverId], references: [id])
   cargoWeightKg     Decimal
   plannedDistanceKm Decimal
   actualDistanceKm  Decimal?

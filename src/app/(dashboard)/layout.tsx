@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { roleThemeNames } from "@/lib/utils";
 import { NotificationBell } from "@/components/dashboard/NotificationBell";
+import { Chatbot } from "@/components/dashboard/Chatbot";
 
 const navItems: Record<string, { label: string; icon: React.ReactNode; href: string; themeName: string }[]> = {
   FLEET_MANAGER: [
@@ -284,6 +285,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </>
         )}
       </AnimatePresence>
+      <Chatbot />
     </div>
   );
 }

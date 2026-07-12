@@ -70,7 +70,7 @@ export default function ComprehensiveReport() {
             padding: 20px;
             background: white !important;
             color: black !important;
-            filter: grayscale(100%);
+            /* removed grayscale to keep charts colorful */
           }
           .print-hide {
             display: none !important;
@@ -95,7 +95,7 @@ export default function ComprehensiveReport() {
       <div className="flex justify-between items-center print-hide">
         <div>
           <h2 className="text-2xl font-bold">Comprehensive Operations Report</h2>
-          <p className="text-[var(--text-secondary)] text-sm mt-1">Full HTML Visualization (Colorful) & PDF Export (Grayscale)</p>
+          <p className="text-[var(--text-secondary)] text-sm mt-1">Full HTML Visualization & PDF Export</p>
         </div>
         <button onClick={() => window.print()} className="btn-primary flex items-center gap-2">
           <Printer className="w-4 h-4" /> Export as PDF
@@ -104,8 +104,8 @@ export default function ComprehensiveReport() {
 
       <div className="print-container-inner space-y-8">
         {/* Header for Print */}
-        <div className="text-center pb-6 border-b border-[var(--border-subtle)]">
-          <h1 className="text-3xl font-bold mb-2">TransitOps Executive Report</h1>
+        <div className="text-center pb-4 border-b border-[var(--border-subtle)]">
+          <h1 className="text-2xl font-bold mb-1">TransitOps Executive Report</h1>
           <p className="text-sm">Generated on: {formatDateTime(new Date().toISOString())}</p>
         </div>
 
@@ -120,9 +120,9 @@ export default function ComprehensiveReport() {
         )}
 
         {/* High-Level Metrics */}
-        <div className="cosmic-panel p-6">
-          <h3 className="text-lg font-bold mb-4 border-b border-[var(--border-subtle)] pb-2">2. Key Performance Indicators</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="cosmic-panel p-5">
+          <h3 className="text-lg font-bold mb-3 border-b border-[var(--border-subtle)] pb-2">2. Key Performance Indicators</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <p className="text-xs uppercase tracking-wider mb-1 opacity-70">Total Operational Cost</p>
               <p className="text-xl font-bold">{formatCurrency(metrics.operationalCost || 0)}</p>
@@ -143,9 +143,9 @@ export default function ComprehensiveReport() {
         </div>
 
         {/* Visual Analytics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="cosmic-panel p-6">
-            <h3 className="text-lg font-bold mb-4 border-b border-[var(--border-subtle)] pb-2">3. Fleet Status Distribution</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="cosmic-panel p-5">
+            <h3 className="text-lg font-bold mb-3 border-b border-[var(--border-subtle)] pb-2">3. Fleet Status Distribution</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -168,8 +168,8 @@ export default function ComprehensiveReport() {
             </div>
           </div>
 
-          <div className="cosmic-panel p-6">
-            <h3 className="text-lg font-bold mb-4 border-b border-[var(--border-subtle)] pb-2">4. Top Vehicle ROI Performers</h3>
+          <div className="cosmic-panel p-5">
+            <h3 className="text-lg font-bold mb-3 border-b border-[var(--border-subtle)] pb-2">4. Top Vehicle ROI Performers</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={topVehicles.slice(0, 5)} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>

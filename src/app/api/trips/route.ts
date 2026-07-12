@@ -41,13 +41,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Vehicle not available" }, { status: 409 });
     }
 
-    // Validate driver availability
-    const driver = await prisma.driver.findUnique({ where: { id: body.driverId } });
-    if (!driver || driver.status !== "AVAILABLE") {
-      return NextResponse.json({ error: "Driver not available" }, { status: 409 });
-    }
-    if (driver.licenseExpiryDate < new Date()) {
-      return NextResponse.json({ error: "Driver license expired" }, { status: 422 });
+    // Validate driver availability (if driverId is provided)
+    if (body.driverId) {
+      const driver = await prisma.driver.findUnique({ where: { id: body.driverId } });
+      if (!driver || driver.status !== "AVAILABLE") {
+        return NextResponse.json({ error: "Driver not available" }, { status: 409 });
+      }
+      if (driver.licenseExpiryDate < new Date()) {
+        return NextResponse.json({ error: "Driver license expired" }, { status: 422 });
+      }
     }
 
     // Validate cargo weight
@@ -59,8 +61,8 @@ export async function POST(req: NextRequest) {
       data: {
         source: body.source,
         destination: body.destination,
-        vehicleId: body.vehicleId,
-        driverId: body.driverId,
+        vehicle: { connect: { id: body.vehicleId } },
+        ...(body.driverId ? { driver: { connect: { id: body.driverId } } } : {}),
         cargoWeightKg: body.cargoWeightKg,
         plannedDistanceKm: body.plannedDistanceKm,
         createdBy: user.id,
